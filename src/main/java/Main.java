@@ -93,7 +93,7 @@ public class Main extends Application {
     private void initCloseRequest() {
         // set up the event for when we close the app
         stage.setOnCloseRequest(closeEvent -> {
-            if(currentPDFFile != null && !prefs.isResettingPreferences) {
+            if(currentPDFFile != null && !prefs.isResettingPreferences()) {
                 prefs.setPDFDirectory(currentPDFFile);
                 prefs.setCurrentPage(currentPage);
             } else { // user is resetting preferences
