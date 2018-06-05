@@ -1,3 +1,5 @@
 # PDFReaderFX
 A simple PDF reader created with JavaFX.
-To compile, open the project and use the maven goal compile assembly:single. Jar will be hosted soon.
+To find released versions, click the "release" tab at the top of this page.
+
+To compile the project yourself, open it and use the maven goal compile assembly:single.
