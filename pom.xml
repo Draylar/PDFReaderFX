@@ -17,6 +17,12 @@
             <artifactId>pdfbox</artifactId>
             <version>2.0.7</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.jfoenix</groupId>
+            <artifactId>jfoenix</artifactId>
+            <version>9.0.4</version>
+        </dependency>
     </dependencies>
 
     <build>

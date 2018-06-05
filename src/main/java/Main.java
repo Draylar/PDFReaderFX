@@ -26,39 +26,41 @@ import java.io.IOException;
 
 public class Main extends Application {
 
-    PreferenceManager prefs = new PreferenceManager();
+    // instances of managers
+    private PreferenceManager prefs = new PreferenceManager();
 
-    public int currentPage;
+    // numbers
+    private int currentPage;
+    private final int pdfScale = 1;
+    private final int width = 600;
+    private final int height = 900;
 
-    public final int pdfScale = 1;
-    public final int width = 600;
-    public final int height = 900;
+    // pdf-related objects
+    private ImageView imageView;
+    private WritableImage fxImage;
+    private BufferedImage img;
+    private PDFRenderer renderer;
+    private PDDocument doc;
+    private File currentPDFFile;
 
-    public ImageView imageView;
-    public WritableImage fxImage;
-    public BufferedImage img;
-    public PDFRenderer renderer;
-    public PDDocument doc;
+    // layouts
+    private Scene scene;
+    private VBox box;
 
-    public Scene scene;
-    public VBox box;
+    // menu objects
+    private final MenuBar navBar = new MenuBar();
+    private final Menu fileButton = new Menu("Menu");
+    private final MenuItem menuItem = new MenuItem("Open PDF");
 
-    final MenuBar navBar = new MenuBar();
-    final Menu fileButton = new Menu("Menu");
-    final MenuItem menuItem = new MenuItem("Open PDF");
-
-    File currentPDFFile;
-
-    public static void main(String[] args) { launch(args);  }
+    // stage instance
+    private Stage stage;
 
     @Override
     public void start(Stage primaryStage) {
-        // prefs.resetPreferences();
+        stage = primaryStage;
 
-        // check previous sessions basically sees if the user has used the application before
-        // and if they were viewing a pdf before they closed it last
+        // call setup functions
         checkLastSession();
-        // load the starting page
         loadStartingPage();
 
         // box to store the image in
@@ -72,28 +74,12 @@ public class Main extends Application {
         fileButton.getItems().addAll(menuItem);
         navBar.getMenus().addAll(fileButton);
 
-        // create a borderpane. borderpanes organize content like this:
-        /*
-                                 top window
-                    |----|-----------------------------|----|
-                    |    |_____________________________|    |
-                    |    |                             |    |
-                    |    |                             |    |
-                    |    |            center           |    |
-                    |    |                             |    |  right window
-        left window |    |                             |    |
-                    |    |_____________________________|    |
-                    |    |                             |    |
-                    |----|-----------------------------|----|
-                                  center window
-         */
+        // set up root
         BorderPane root = new BorderPane();
-
-        // now we're going to set the center to the main pdf and the top to the nav bar
         root.setCenter(box);
         root.setTop(navBar);
 
-        // as well as set the VBox alignment to center so the pdf is centered when we resize the application
+        // set alignment
         box.setAlignment(Pos.CENTER);
 
         // create our scene with the borderpane and a default width/height
@@ -104,8 +90,17 @@ public class Main extends Application {
         primaryStage.setTitle("PDF FX");
         primaryStage.setScene(scene);
 
+        initCloseRequest();
+
+        // rock and roll
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) { launch(args);  }
+
+    private void initCloseRequest() {
         // set up the event for when we close the app
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent event) {
                 if(currentPDFFile != null && !prefs.isResettingPreferences) {
                     prefs.setPDFDirectory(currentPDFFile);
@@ -115,12 +110,9 @@ public class Main extends Application {
                 }
             }
         });
-
-        // rock and roll
-        primaryStage.show();
     }
 
-    public void pdfClickEventHandler() {
+    private void pdfClickEventHandler() {
         box.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 if((event.getX()) > (scene.getWidth() / 2)) {
@@ -132,7 +124,7 @@ public class Main extends Application {
         });
     }
 
-    public void loadStartingPage() {
+    private void loadStartingPage() {
         try {
             doc = PDDocument.load(currentPDFFile);
             renderer = new PDFRenderer(doc);
@@ -145,7 +137,7 @@ public class Main extends Application {
         imageView = new ImageView(fxImage);
     }
 
-    public void nextPage() {
+    private void nextPage() {
         currentPage++;
         try {
             img = renderer.renderImage(currentPage, pdfScale);
@@ -156,7 +148,7 @@ public class Main extends Application {
         imageView.setImage(fxImage);
     }
 
-    public void previousPage() {
+    private void previousPage() {
         currentPage--;
         try {
             img = renderer.renderImage(currentPage, pdfScale);
@@ -167,9 +159,9 @@ public class Main extends Application {
         imageView.setImage(fxImage);
     }
 
-    public void checkLastSession() {
+    private void checkLastSession() {
         // if we don't have a directory from a previous session
-        if(prefs.getPDFDirectory().toString() == "noDirectory") {
+        if(prefs.getPDFDirectory().toString().equals("noDirectory")) {
             currentPDFFile = openDirectoryChooser();
         } else {
             currentPDFFile = prefs.getPDFDirectory();
@@ -181,7 +173,7 @@ public class Main extends Application {
         }
     }
 
-    public File openDirectoryChooser() {
+    private File openDirectoryChooser() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
