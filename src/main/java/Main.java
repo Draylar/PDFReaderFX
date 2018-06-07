@@ -152,6 +152,7 @@ public class Main extends Application {
             e.printStackTrace();
         }
 
+        currentPDFFile = PDF;
         fxImage = SwingFXUtils.toFXImage(img, null);
         imageView.setImage(fxImage);
     }
