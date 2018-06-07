@@ -160,7 +160,15 @@ public class Main extends Application {
 
             doc = PDDocument.load(PDF);
             renderer = new PDFRenderer(doc);
-            img = renderer.renderImage(currentPage, pdfScale);
+            try {
+                img = renderer.renderImage(currentPage, pdfScale);
+            } catch (Exception e) {
+                // sometimes the page number will not work and the application will not open.
+                // to fix this, we can check for the exception, and set the page to 0.
+                System.out.println("Page was invalid! Sending you to the first page.");
+                currentPage = 0;
+                img = renderer.renderImage(currentPage, pdfScale);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
