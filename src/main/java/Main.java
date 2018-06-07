@@ -183,15 +183,18 @@ public class Main extends Application {
      * Moves to the next page.
      */
     private void nextPage() {
-        currentPage++;
-        try {
-            img = renderer.renderImage(currentPage, pdfScale);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // only go to the next page if it exists
+        if(currentPage + 1 <= doc.getNumberOfPages()) {
+            currentPage++;
+            try {
+                img = renderer.renderImage(currentPage, pdfScale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-        fxImage = SwingFXUtils.toFXImage(img, null);
-        imageView.setImage(fxImage);
+            fxImage = SwingFXUtils.toFXImage(img, null);
+            imageView.setImage(fxImage);
+        }
     }
 
 
@@ -199,14 +202,17 @@ public class Main extends Application {
      * Goes to the previous page.
      */
     private void previousPage() {
-        currentPage--;
-        try {
-            img = renderer.renderImage(currentPage, pdfScale);
-        } catch (Exception e) {
-            e.printStackTrace();
+        // only go to the previous page if it is at or over the index of 0
+        if(currentPage - 1 >= 0) {
+            currentPage--;
+            try {
+                img = renderer.renderImage(currentPage, pdfScale);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            fxImage = SwingFXUtils.toFXImage(img, null);
+            imageView.setImage(fxImage);
         }
-        fxImage = SwingFXUtils.toFXImage(img, null);
-        imageView.setImage(fxImage);
     }
 
 
