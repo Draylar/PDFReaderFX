@@ -10,6 +10,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -32,7 +33,7 @@ public class Main extends Application {
     private final int height = 900;
 
     // pdf-related objects
-    private ImageView imageView;
+    private ImageView imageView = new ImageView();
     private WritableImage fxImage;
     private BufferedImage img;
     private PDFRenderer renderer;
@@ -60,9 +61,9 @@ public class Main extends Application {
 
         // call setup functions
         checkLastSession();
-        loadStartingPage();
         initPageClick();
         initCloseRequest();
+        initOpenClick();
 
         // add dropdown items to the first menu button, and then add the menu button to the menu bar
         fileButton.getItems().addAll(menuItem);
@@ -100,6 +101,8 @@ public class Main extends Application {
                 prefs.setResettingPreferences(false);
             }
         });
+
+
     }
 
 
@@ -119,12 +122,30 @@ public class Main extends Application {
 
 
     /**
+     * Sets up the click event for the open PDF button.
+     */
+    private void initOpenClick() {
+        fileButton.setOnAction(mouseEvent -> {
+            currentPage = 0;
+            loadPage(getDirectoryFromChooser());
+        });
+    }
+
+
+    /**
      * Loads the starting page when the application is opened.
      * Should be called when the application starts.
      */
-    private void loadStartingPage() {
+    private void loadPage(File PDF) {
         try {
-            doc = PDDocument.load(currentPDFFile);
+            try {
+                doc.close();
+            } catch (Exception e) {
+                System.out.println("Can't be closed!");
+            }
+
+
+            doc = PDDocument.load(PDF);
             renderer = new PDFRenderer(doc);
             img = renderer.renderImage(currentPage, pdfScale);
         } catch (IOException e) {
@@ -132,7 +153,7 @@ public class Main extends Application {
         }
 
         fxImage = SwingFXUtils.toFXImage(img, null);
-        imageView = new ImageView(fxImage);
+        imageView.setImage(fxImage);
     }
 
 
@@ -146,6 +167,7 @@ public class Main extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         fxImage = SwingFXUtils.toFXImage(img, null);
         imageView.setImage(fxImage);
     }
@@ -173,15 +195,16 @@ public class Main extends Application {
     private void checkLastSession() {
         // if we don't have a directory from a previous session
         if(prefs.getPDFDirectory().toString().equals("noDirectory")) {
-            currentPDFFile = openDirectoryChooser();
+            currentPDFFile = getDirectoryFromChooser();
         } else {
             currentPDFFile = prefs.getPDFDirectory();
+
+            if(prefs.getCurrentPage() != 0) {
+                currentPage = prefs.getCurrentPage();
+            }
         }
 
-        // now we check the previous page settings
-        if(prefs.getCurrentPage() != 0) {
-            currentPage = prefs.getCurrentPage();
-        }
+        loadPage(currentPDFFile);
     }
 
 
@@ -189,26 +212,20 @@ public class Main extends Application {
      * Opens the directory chooser so the user can select a PDF to read.
      * @return the selected file
      */
-    private File openDirectoryChooser() {
+    private File getDirectoryFromChooser() {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        JFileChooser fileChooser = new JFileChooser();
+        FileChooser fileChooser = new FileChooser();
 
-        fileChooser.setCurrentDirectory(new java.io.File("."));
-        fileChooser.setDialogTitle("Choose a PDF to read");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setInitialDirectory(new java.io.File("."));
+        fileChooser.setTitle("Choose a PDF to read");
 
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            System.out.println("getSelectedFile() : " + fileChooser.getSelectedFile());
-        } else {
-            System.out.println("No Selection ");
-        }
+        File configFile = fileChooser.showOpenDialog(null);
 
-        return fileChooser.getSelectedFile();
+        return configFile.getAbsoluteFile();
     }
 
     }
