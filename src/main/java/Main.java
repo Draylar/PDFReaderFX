@@ -7,6 +7,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -64,6 +66,7 @@ public class Main extends Application {
         initPageClick();
         initCloseRequest();
         initOpenClick();
+        initKeyboardPresses();
 
         // add dropdown items to the first menu button, and then add the menu button to the menu bar
         fileButton.getItems().addAll(menuItem);
@@ -128,6 +131,16 @@ public class Main extends Application {
         fileButton.setOnAction(mouseEvent -> {
             currentPage = 0;
             loadPage(getDirectoryFromChooser());
+        });
+    }
+
+    private void initKeyboardPresses() {
+        stage.addEventHandler(KeyEvent.KEY_PRESSED, keyEvent -> {
+            if(keyEvent.getCode().equals(KeyCode.LEFT) || keyEvent.getCode().equals(KeyCode.A)) {
+                previousPage();
+            } else if (keyEvent.getCode().equals(KeyCode.RIGHT) || keyEvent.getCode().equals(KeyCode.D)) {
+                nextPage();
+            }
         });
     }
 
